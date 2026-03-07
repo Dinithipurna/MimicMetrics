@@ -32,17 +32,22 @@ wheels/
 .DS_Store
 
 # Data
-data/raw/
-data/processed/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
 *.csv
 *.h5
 *.pkl
 *.pickle
 
 # Results
-results/checkpoints/
-results/logs/
-results/predictions/
+results/checkpoints/*
+!results/checkpoints/.gitkeep
+results/logs/*
+!results/logs/.gitkeep
+results/predictions/*
+!results/predictions/.gitkeep
 wandb/
 
 # Jupyter
