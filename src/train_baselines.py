@@ -17,8 +17,37 @@ from torch.optim import Adam
 from scipy.stats import pearsonr
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import tqdm
+import logging
+import datetime
 
-from src.baselines import VitGRUBaseline, Wav2Vec2LinearBaseline
+# Configure logging to save logs in separate files for each training run
+def setup_logging(training_name):
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_dir = Path(f"logs/{training_name}_{timestamp}")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "training.log"
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(log_file, mode='w')
+        ]
+    )
+    return log_file
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("training.log", mode='w')
+    ]
+)
+
+from src.baselines import VitGRUBaseline, Wav2Vec2LinearBaseline, Wav2Vec2LSTMBaseline
 from src.dataloaders import create_dataloaders
 
 
@@ -35,60 +64,68 @@ class BaselineTrainer:
         """Train for one epoch."""
         self.model.train()
         total_loss = 0
-        
+
         for embeddings, labels in tqdm.tqdm(dataloader, desc="Training"):
             embeddings = embeddings.to(self.device)
             labels = labels.to(self.device)
-            
+
+            # Calculate sequence lengths for the batch and move to CPU as int64
+            lengths = torch.tensor([e.size(0) for e in embeddings], dtype=torch.int64, device="cpu")
+
             # Forward pass
-            logits = self.model(embeddings)
+            logits = self.model(embeddings, lengths)
             loss = self.criterion(logits, labels)
-            
+
             # Backward pass
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            
+
             total_loss += loss.item()
-        
+
         return total_loss / len(dataloader)
     
     @torch.no_grad()
     def evaluate(self, dataloader):
         """Evaluate on validation set. Returns MSE, MAE, Pearson correlation."""
         self.model.eval()
-        
+
         all_preds = []
         all_labels = []
         total_loss = 0
-        
+
         for embeddings, labels in tqdm.tqdm(dataloader, desc="Evaluating"):
             embeddings = embeddings.to(self.device)
             labels = labels.to(self.device)
-            
-            logits = self.model(embeddings)
+
+            # Calculate sequence lengths for the batch and move to CPU as int64
+            lengths = torch.tensor([e.size(0) for e in embeddings], dtype=torch.int64, device="cpu")
+
+            logits = self.model(embeddings, lengths)
             loss = self.criterion(logits, labels)
-            
+
             total_loss += loss.item()
             all_preds.append(logits.cpu().numpy())
             all_labels.append(labels.cpu().numpy())
-        
+
         all_preds = np.concatenate(all_preds, axis=0)
         all_labels = np.concatenate(all_labels, axis=0)
-        
+
         mse = mean_squared_error(all_labels, all_preds)
         mae = mean_absolute_error(all_labels, all_preds)
-        
-        # Compute Pearson correlation across all samples/emotions
-        flat_preds = all_preds.flatten()
-        flat_labels = all_labels.flatten()
-        pearson_corr, _ = pearsonr(flat_labels, flat_preds)
-        
+
+        # Compute Pearson correlation for each dimension and average
+        pearson_corrs = []
+        for i in range(all_labels.shape[1]):
+            corr, _ = pearsonr(all_labels[:, i], all_preds[:, i])
+            pearson_corrs.append(corr)
+        avg_pearson_corr = np.mean(pearson_corrs)
+
         return {
             'loss': total_loss / len(dataloader),
             'mse': mse,
             'mae': mae,
-            'pearson': pearson_corr
+            'pearson': avg_pearson_corr
         }
     
     def save_checkpoint(self, path):
@@ -119,6 +156,10 @@ def train_baseline(model_name, dataloaders, device, num_epochs=50, learning_rate
         model = Wav2Vec2LinearBaseline(input_dim=768, output_dim=6)
         train_loader = dataloaders['wav2vec2_train']
         valid_loader = dataloaders['wav2vec2_valid']
+    elif model_name == 'wav2vec2_lstm':
+        model = Wav2Vec2LSTMBaseline(input_dim=768, output_dim=6)
+        train_loader = dataloaders['wav2vec2_train']
+        valid_loader = dataloaders['wav2vec2_valid']
     else:
         raise ValueError(f"Unknown model: {model_name}")
     
@@ -127,10 +168,11 @@ def train_baseline(model_name, dataloaders, device, num_epochs=50, learning_rate
     best_mse = float('inf')
     best_epoch = 0
     history = {'train_loss': [], 'val_metrics': []}
+    best_pearson = -float('inf')  # Track best Pearson correlation
     
-    print(f"\n{'='*60}")
-    print(f"Training {model_name.upper()} Baseline")
-    print(f"{'='*60}\n")
+    logging.info(f"{'='*60}")
+    logging.info(f"Training {model_name.upper()} Baseline")
+    logging.info(f"{'='*60}\n")
     
     for epoch in range(num_epochs):
         train_loss = trainer.train_epoch(train_loader)
@@ -139,13 +181,13 @@ def train_baseline(model_name, dataloaders, device, num_epochs=50, learning_rate
         history['train_loss'].append(train_loss)
         history['val_metrics'].append(val_metrics)
         
-        print(f"Epoch {epoch+1}/{num_epochs}")
-        print(f"  Train Loss: {train_loss:.4f}")
-        print(f"  Val MSE:    {val_metrics['mse']:.4f}")
-        print(f"  Val MAE:    {val_metrics['mae']:.4f}")
-        print(f"  Val Pearson: {val_metrics['pearson']:.4f}")
-        
-        # Save best checkpoint
+        logging.info(f"Epoch {epoch+1}/{num_epochs}")
+        logging.info(f"  Train Loss: {train_loss:.4f}")
+        logging.info(f"  Val MSE:    {val_metrics['mse']:.4f}")
+        logging.info(f"  Val MAE:    {val_metrics['mae']:.4f}")
+        logging.info(f"  Val Pearson: {val_metrics['pearson']:.4f}")
+
+        # Save best checkpoint based on MSE
         if val_metrics['mse'] < best_mse:
             best_mse = val_metrics['mse']
             best_epoch = epoch
@@ -153,96 +195,90 @@ def train_baseline(model_name, dataloaders, device, num_epochs=50, learning_rate
                 os.makedirs(save_dir, exist_ok=True)
                 checkpoint_path = os.path.join(save_dir, f"best_{model_name}.pt")
                 trainer.save_checkpoint(checkpoint_path)
-    
-    print(f"\n{'='*60}")
-    print(f"Training Complete!")
-    print(f"Best Epoch: {best_epoch+1}, Best Val MSE: {best_mse:.4f}")
-    print(f"{'='*60}\n")
+                logging.info(f"New best model saved at epoch {epoch+1} with MSE: {best_mse:.4f}")
+
+        # Save best checkpoint based on Pearson correlation
+        if val_metrics['pearson'] > best_pearson:
+            best_pearson = val_metrics['pearson']
+            if save_dir:
+                os.makedirs(save_dir, exist_ok=True)
+                checkpoint_path = os.path.join(save_dir, f"best_pearson_{model_name}.pt")
+                trainer.save_checkpoint(checkpoint_path)
+                logging.info(f"New best model saved at epoch {epoch+1} with Pearson Correlation: {best_pearson:.4f}")
+
+    logging.info(f"{'='*60}")
+    logging.info(f"Training Complete!")
+    logging.info(f"Best Epoch: {best_epoch+1}, Best Val MSE: {best_mse:.4f}")
+    logging.info(f"Best Pearson Correlation: {best_pearson:.4f}")
+    logging.info(f"{'='*60}\n")
     
     return trainer, history
 
 
 def main():
     parser = argparse.ArgumentParser(description='Train EMI baselines')
-    parser.add_argument('--model', choices=['vit', 'wav2vec2', 'both'], default='both',
+    parser.add_argument('--model', choices=['vit', 'wav2vec2', 'wav2vec2_lstm', 'both'], default='both',
                         help='Which model to train')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cuda', help='Device')
+    parser.add_argument('--vit_dir', type=str, default="/home/dinithi/Documents/EMI_Challenge/results/checkpoints/baseline/vit", help='Path to ViT embeddings directory')
+    parser.add_argument('--wav2vec2_dir', type=str, default="/home/dinithi/Documents/EMI_Challenge/results/checkpoints/baseline/wav2vec2", help='Path to Wav2Vec2 embeddings directory')
+    parser.add_argument('--train_csv', type=str, default="/home/dinithi/Documents/EMI_Challenge/data/splits/train_split.csv", help='Path to training split CSV')
+    parser.add_argument('--valid_csv', type=str, default="/home/dinithi/Documents/EMI_Challenge/data/splits/valid_split.csv", help='Path to validation split CSV')
     args = parser.parse_args()
-    
-    # Paths
-    base_dir = Path('/home/dinithi/Documents/EMI_Challenge')
-    vit_dir = base_dir / 'results/checkpoints/baseline/vit'
-    wav2vec2_dir = base_dir / 'results/checkpoints/baseline/wav2vec2'
-    train_csv = base_dir / 'data/splits/train_split.csv'
-    valid_csv = base_dir / 'data/splits/valid_split.csv'
-    checkpoint_dir = base_dir / 'results/checkpoints/trained'
-    
-    # Verify paths exist
-    assert vit_dir.exists(), f"ViT embeddings not found at {vit_dir}"
-    assert wav2vec2_dir.exists(), f"Wav2Vec2 embeddings not found at {wav2vec2_dir}"
-    assert train_csv.exists(), f"Train split CSV not found at {train_csv}"
-    assert valid_csv.exists(), f"Valid split CSV not found at {valid_csv}"
-    
-    # Create dataloaders
-    print("Loading data...")
-    dataloaders = create_dataloaders(
-        str(vit_dir), str(wav2vec2_dir),
-        str(train_csv), str(valid_csv),
-        batch_size=args.batch_size, num_workers=4
-    )
-    
-    # Device
-    if args.device == 'cuda' and torch.cuda.is_available():
-        device = torch.device('cuda:0')
+
+    # Parse arguments
+    model_name = args.model
+    if model_name == 'vit':
+        model = VitGRUBaseline(input_dim=384, hidden_dim=256, num_layers=3, output_dim=6)
+        training_name = 'vit_gru_baseline'
+    elif model_name == 'wav2vec2':
+        model = Wav2Vec2LinearBaseline(input_dim=768, output_dim=6)
+        training_name = 'wav2vec2_linear_baseline'
+    elif model_name == 'wav2vec2_lstm':
+        model = Wav2Vec2LSTMBaseline(input_dim=768, output_dim=6)
+        training_name = 'wav2vec2_lstm_baseline'
     else:
-        device = torch.device('cpu')
-    print(f"Using device: {device}\n")
-    
-    # Train models
-    results = {}
-    
-    if args.model in ['vit', 'both']:
-        trainer_vit, history_vit = train_baseline(
-            'vit', dataloaders, device,
-            num_epochs=args.epochs, learning_rate=args.lr,
-            save_dir=str(checkpoint_dir)
-        )
-        results['vit'] = history_vit
-    
-    if args.model in ['wav2vec2', 'both']:
-        trainer_wav2vec2, history_wav2vec2 = train_baseline(
-            'wav2vec2', dataloaders, device,
-            num_epochs=args.epochs, learning_rate=args.lr,
-            save_dir=str(checkpoint_dir)
-        )
-        results['wav2vec2'] = history_wav2vec2
-    
-    # Save results
-    if not results:
-        print("No models trained!")
-        return
-    
-    # Convert numpy arrays to lists for JSON serialization
-    def convert_for_json(obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif isinstance(obj, dict):
-            return {k: convert_for_json(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [convert_for_json(item) for item in obj]
-        return obj
-    
-    results_json = convert_for_json(results)
-    
-    results_path = checkpoint_dir / 'training_results.json'
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    with open(results_path, 'w') as f:
-        json.dump(results_json, f, indent=2)
-    print(f"Results saved to {results_path}")
+        raise ValueError("Invalid model choice. Use 'vit', 'wav2vec2', or 'wav2vec2_lstm'.")
 
+    # Setup logging
+    log_file = setup_logging(training_name)
+    print(f"Logging to {log_file}")
 
-if __name__ == '__main__':
+    # Paths
+    save_dir = Path("results") / training_name
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    # Train the model
+    trainer, history = train_baseline(
+        model_name=model_name,
+        dataloaders=create_dataloaders(
+            vit_dir=args.vit_dir,
+            wav2vec2_dir=args.wav2vec2_dir,
+            train_csv=args.train_csv,
+            valid_csv=args.valid_csv,
+            batch_size=args.batch_size
+        ),
+        device=torch.device(args.device),
+        num_epochs=args.epochs,
+        learning_rate=args.lr,
+        save_dir=save_dir
+    )
+
+    # Log results instead of dumping to JSON
+    results_log_file = save_dir / f"results_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    with open(results_log_file, 'w') as f:
+        f.write("Training Results:\n")
+        for epoch, metrics in enumerate(history['val_metrics']):
+            f.write(f"Epoch {epoch+1}:\n")
+            f.write(f"  Train Loss: {history['train_loss'][epoch]:.4f}\n")
+            f.write(f"  Val MSE: {metrics['mse']:.4f}\n")
+            f.write(f"  Val MAE: {metrics['mae']:.4f}\n")
+            f.write(f"  Val Pearson: {metrics['pearson']:.4f}\n\n")
+
+    logging.info(f"Results saved to {results_log_file}")
+
+if __name__ == "__main__":
     main()

@@ -108,6 +108,12 @@ def create_dataloaders(vit_dir, wav2vec2_dir, train_csv, valid_csv, batch_size=3
     wav2vec2_train_dataset = EmbeddingDataset(wav2vec2_dir, train_csv, label_columns)
     wav2vec2_valid_dataset = EmbeddingDataset(wav2vec2_dir, valid_csv, label_columns)
     
+    concat_train_dataset = EmbeddingDataset(vit_dir, train_csv, label_columns)
+    concat_valid_dataset = EmbeddingDataset(vit_dir, valid_csv, label_columns)
+
+    cross_attn_train_dataset = EmbeddingDataset(vit_dir, train_csv, label_columns)
+    cross_attn_valid_dataset = EmbeddingDataset(vit_dir, valid_csv, label_columns)
+
     # Create dataloaders
     def collate_fn(batch):
         """Custom collate to handle variable sequence lengths."""
@@ -144,6 +150,22 @@ def create_dataloaders(vit_dir, wav2vec2_dir, train_csv, valid_csv, batch_size=3
             wav2vec2_valid_dataset, batch_size=batch_size, shuffle=False,
             num_workers=num_workers, collate_fn=collate_fn
         ),
+        'concat_train': DataLoader(
+            concat_train_dataset, batch_size=batch_size, shuffle=True,
+            num_workers=num_workers, collate_fn=collate_fn
+        ),
+        'concat_valid': DataLoader(
+            concat_valid_dataset, batch_size=batch_size, shuffle=False,
+            num_workers=num_workers, collate_fn=collate_fn
+        ),
+        'cross_attn_train': DataLoader(
+            cross_attn_train_dataset, batch_size=batch_size, shuffle=True,
+            num_workers=num_workers, collate_fn=collate_fn
+        ),
+        'cross_attn_valid': DataLoader(
+            cross_attn_valid_dataset, batch_size=batch_size, shuffle=False,
+            num_workers=num_workers, collate_fn=collate_fn
+        )
     }
     
     return loaders

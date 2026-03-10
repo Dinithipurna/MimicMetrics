@@ -54,6 +54,7 @@ results/predictions/*
 !results/predictions/.gitkeep
 !results/predictions/**/.gitkeep
 wandb/
+results/wav2vec2_lstm_baseline/
 
 # Jupyter
 .ipynb_checkpoints/
