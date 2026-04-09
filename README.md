@@ -61,7 +61,7 @@ Text Embeddings    Audio Embeddings    Visual Embeddings    [Motion Sequences]
 
 ```bash
 # Clone or navigate to the repository
-cd staged_fusion_training
+cd MimicMetrics
 
 # Create virtual environment
 python -m venv venv
@@ -152,10 +152,11 @@ python src/staged_fusion_training.py \
 
 ## Citation
 
-If you use this framework in your research, please cite:
+**If you use this framework in your research, please cite:**
 
-```
-Dinithi Dissanayake, Shaveen Silva, Ovindu Atukorala, Prasanth Sasikumar, and Suranga Nanayakkara. 2026. Two-Stage Multimodal Framework for Emotion Mimicry Intensity Prediction. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops).
-```
+> Dinithi Dissanayake, Shaveen Silva, Ovindu Atukorala, Prasanth Sasikumar, and
+> Suranga Nanayakkara. 2026. *Two-Stage Multimodal Framework for Emotion Mimicry
+> Intensity Prediction.* In *Proceedings of the IEEE/CVF Conference on Computer
+> Vision and Pattern Recognition Workshops (CVPR Workshops).*
 
 
