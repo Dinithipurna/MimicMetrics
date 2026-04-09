@@ -1,0 +1,72 @@
+# Example configuration file for staged fusion training
+# Usage: python src/staged_fusion_training.py --config configs/example.yaml
+# (Note: Command-line arguments override YAML values)
+
+# Data Paths
+data:
+  face_embeddings_dir: "./data/embeddings/face"
+  audio_embeddings_dir: "./data/embeddings/audio"  
+  text_embeddings_dir: "./data/embeddings/text"
+  train_split_csv: "./data/splits/train_split.csv"
+  valid_split_csv: "./data/splits/val_split.csv"
+  motion_sequences_dir: "./data/motion"  # Optional
+
+# Model Dimensions
+dimensions:
+  face_input_dim: 768           # DINOv2-base
+  text_input_dim: 768
+  audio_input_dim: 1024
+  text_hidden: 384
+  audio_hidden: 384
+  vision_hidden: 384
+  fusion_hidden: 128            # Smaller fusion head
+  dropout: 0.45
+  modality_drop_prob: 0.3
+
+# Training Hyperparameters
+training:
+  batch_size: 16
+  eval_batch_size: 32
+  optimizer:
+    name: "AdamW"
+    lr: 2.0e-4
+    weight_decay: 1.0e-2
+  scheduler:
+    name: "ReduceLROnPlateau"
+    factor: 0.5
+    patience: 3
+  grad_clip: 1.0
+  loss: "combined"             # "ccc" or "combined"
+  loss_alpha: 0.7              # Weight of CCC in combined loss
+
+# Per-Stage Configuration
+stages:
+  text:
+    epochs: 50
+    patience: 10
+  audio:
+    epochs: 50
+    patience: 10
+  vision:
+    epochs: 50
+    patience: 10
+  motion:
+    enabled: false
+    epochs: 100
+    hidden_dim: 128
+    patience: 10
+  fusion:
+    epochs: 100
+    patience: 15
+
+# Output Configuration
+output:
+  save_dir: "./results/checkpoints"
+  log_dir: "./logs"
+
+# System
+system:
+  device: "cuda:0"
+  num_workers: 4
+  seed: 42
+  amp_enabled: false            # Automatic mixed precision (experimental)
