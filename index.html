@@ -166,10 +166,22 @@
     pre {
       background: #111827;
       color: #e5e7eb;
-      padding: 18px;
+      padding: 20px 22px;
       border-radius: 14px;
       overflow-x: auto;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border-radius: 0;
+      font-size: inherit;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
     .footer {
@@ -186,6 +198,10 @@
 
       section {
         padding: 22px;
+      }
+
+      .container {
+        padding: 24px 14px 50px;
       }
     }
   </style>
@@ -361,10 +377,6 @@
 
       <pre><code>git clone https://github.com/Dinithipurna/MimicMetrics.git
 cd MimicMetrics
-
-python -m venv venv
-source venv/bin/activate
-
 pip install -r requirements.txt</code></pre>
     </section>
 
