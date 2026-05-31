@@ -10,16 +10,14 @@ Our team placed **3rd in the EMI Challenge**, achieving an average Pearson corre
 
 ## Poster
 
-![MimicMetrics Poster](assets/poster.pdf)
-
-> Replace `assets/poster.png` with the actual path to your poster image or PDF preview.
-
+[![MimicMetrics Poster](assets/poster.png)](assets/poster.pdf)
 ---
 
 ## Links
 
-- **Paper:** https://arxiv.org/pdf/2605.21869  
-- **Code:** https://github.com/Dinithipurna/MimicMetrics  
+[Paper](https://arxiv.org/pdf/2605.21869) · 
+[Code](https://github.com/Dinithipurna/MimicMetrics) · 
+[Poster](assets/poster.pdf)
 
 ---
 

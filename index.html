@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MimicMetrics | Emotion Mimicry Intensity Prediction</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f7f9fc;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 40px 24px 70px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 35px 20px 25px;
+      background: linear-gradient(135deg, #eaf2ff, #ffffff);
+      border-radius: 22px;
+      box-shadow: 0 8px 25px rgba(30, 64, 175, 0.08);
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      color: #1e40af;
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: #374151;
+      max-width: 820px;
+      margin: 0 auto 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: bold;
+      margin: 8px 4px;
+      font-size: 0.95rem;
+    }
+
+    .links {
+      margin-top: 22px;
+    }
+
+    .links a {
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      background: #1e40af;
+      padding: 10px 18px;
+      border-radius: 10px;
+      margin: 6px;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+
+    .links a:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    section {
+      background: white;
+      padding: 28px;
+      border-radius: 18px;
+      margin-bottom: 26px;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    h2 {
+      color: #1e40af;
+      margin-top: 0;
+      font-size: 1.55rem;
+    }
+
+    h3 {
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .poster {
+      text-align: center;
+    }
+
+    .poster img {
+      max-width: 100%;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    }
+
+    .poster p {
+      margin-top: 12px;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 15px;
+      padding: 18px;
+    }
+
+    .card strong {
+      color: #1e40af;
+    }
+
+    .result-box {
+      background: #eff6ff;
+      border-left: 5px solid #1e40af;
+      padding: 16px 18px;
+      border-radius: 12px;
+      margin: 14px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 11px;
+      text-align: left;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #1e40af;
+    }
+
+    code {
+      background: #f3f4f6;
+      padding: 2px 5px;
+      border-radius: 5px;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: #111827;
+      color: #e5e7eb;
+      padding: 18px;
+      border-radius: 14px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      margin-top: 40px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 700px) {
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      section {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="hero">
+      <h1>MimicMetrics</h1>
+
+      <p class="subtitle">
+        Two-Stage Multimodal Framework for Emotion Mimicry Intensity Prediction
+      </p>
+
+      <div>
+        <span class="badge">CVPR ABAW Workshop</span>
+        <span class="badge">Hume-ABAW10 EMI Challenge</span>
+        <span class="badge">3rd Place</span>
+      </div>
+
+      <p class="subtitle">
+        A staged multimodal learning framework for predicting continuous emotion mimicry intensity
+        from text, audio, vision, and optional motion features.
+      </p>
+
+      <div class="links">
+        <a href="https://arxiv.org/pdf/2605.21869" target="_blank">Paper</a>
+        <a href="https://github.com/Dinithipurna/MimicMetrics" target="_blank">Code</a>
+        <a href="assets/poster.pdf" target="_blank">Poster PDF</a>
+      </div>
+    </div>
+
+    <section class="poster">
+      <h2>Poster</h2>
+
+      <a href="assets/poster.pdf" target="_blank">
+        <img src="assets/poster.png" alt="MimicMetrics Poster" />
+      </a>
+
+      <p>Click the poster to open the PDF version.</p>
+    </section>
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        Emotion Mimicry Intensity prediction is a multimodal affective computing task that
+        requires predicting continuous intensity values across six affective dimensions:
+        <strong>Admiration, Amusement, Determination, Empathic Pain, Excitement, and Joy</strong>.
+      </p>
+
+      <p>
+        Instead of training a single end-to-end multimodal model from scratch, MimicMetrics uses
+        a staged strategy. We first train unimodal encoders independently, then remove their prediction
+        heads and fuse the learned representations using a lightweight MLP regressor.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key Results</h2>
+
+      <div class="result-box">
+        <strong>Official test performance:</strong> 0.570 average Pearson correlation
+      </div>
+
+      <div class="result-box">
+        <strong>Challenge ranking:</strong> 3rd place in the Hume-ABAW10 EMI Challenge
+      </div>
+
+      <div class="result-box">
+        <strong>Best validation setting:</strong> Text + Audio + Vision + Motion under the expanded 4:1 split,
+        achieving 0.4722 validation Pearson.
+      </div>
+
+      <p>
+        Overall, text and audio provided the strongest standalone signals, while video and motion acted as
+        more selective complementary cues, especially for dimensions such as Joy, Amusement, and Excitement.
+      </p>
+    </section>
+
+    <section>
+      <h2>Framework</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Stage 1</h3>
+          <p><strong>Text Encoder</strong><br />Trained on text embeddings.</p>
+        </div>
+
+        <div class="card">
+          <h3>Stage 2</h3>
+          <p><strong>Audio Encoder</strong><br />Trained on wav2vec2-based audio embeddings.</p>
+        </div>
+
+        <div class="card">
+          <h3>Stage 3</h3>
+          <p><strong>Vision Encoder</strong><br />Trained on DINOv2 face embeddings.</p>
+        </div>
+
+        <div class="card">
+          <h3>Optional Stage</h3>
+          <p><strong>Motion Encoder</strong><br />Trained on OpenFace AU + head-pose sequences.</p>
+        </div>
+
+        <div class="card">
+          <h3>Final Stage</h3>
+          <p><strong>Fusion Regressor</strong><br />Concatenates learned representations and predicts six EMI dimensions.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Modalities and Feature Dimensions</h2>
+
+      <table>
+        <tr>
+          <th>Modality</th>
+          <th>Feature Type</th>
+          <th>Input Dimension</th>
+          <th>Encoder Output</th>
+        </tr>
+        <tr>
+          <td>Text</td>
+          <td>GTE text embedding</td>
+          <td>768</td>
+          <td>384</td>
+        </tr>
+        <tr>
+          <td>Audio</td>
+          <td>Custom wav2vec2 embedding</td>
+          <td>1024</td>
+          <td>384</td>
+        </tr>
+        <tr>
+          <td>Vision</td>
+          <td>DINOv2 face embedding</td>
+          <td>768</td>
+          <td>384</td>
+        </tr>
+        <tr>
+          <td>Motion</td>
+          <td>OpenFace AU + head-pose sequence</td>
+          <td>23</td>
+          <td>128</td>
+        </tr>
+        <tr>
+          <td>Output</td>
+          <td>Six EMI dimensions</td>
+          <td>—</td>
+          <td>6</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Why Motion?</h2>
+
+      <p>
+        We explored motion as an HCI-inspired auxiliary modality. While DINOv2 captures visual appearance,
+        it may not fully capture behaviorally meaningful dynamics such as head pose, facial action units,
+        blinking, mouth movement, and subtle temporal facial changes.
+      </p>
+
+      <p>
+        The motion branch did not provide a major performance advantage, but it served as a meaningful
+        complementary cue and remains an interesting direction for future work.
+      </p>
+    </section>
+
+    <section>
+      <h2>Installation</h2>
+
+      <pre><code>git clone https://github.com/Dinithipurna/MimicMetrics.git
+cd MimicMetrics
+
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt</code></pre>
+    </section>
+
+    <section>
+      <h2>Quick Start</h2>
+
+      <h3>Train Text + Audio + Vision Fusion</h3>
+
+      <pre><code>python src/staged_fusion_training.py \
+  --face_dir ./data/embeddings/face \
+  --audio_dir ./data/embeddings/audio \
+  --text_dir ./data/embeddings/text \
+  --train_csv ./data/splits/train_split.csv \
+  --valid_csv ./data/splits/val_split.csv \
+  --save_dir ./results/checkpoints \
+  --log_dir ./logs \
+  --batch_size 16 \
+  --device cuda:0</code></pre>
+
+      <h3>Train with Optional Motion Branch</h3>
+
+      <pre><code>python src/staged_fusion_training.py \
+  --face_dir ./data/embeddings/face \
+  --audio_dir ./data/embeddings/audio \
+  --text_dir ./data/embeddings/text \
+  --train_csv ./data/splits/train_split.csv \
+  --valid_csv ./data/splits/val_split.csv \
+  --use_motion_seq \
+  --motion_seq_dir ./data/motion \
+  --motion_hidden_dim 128 \
+  --motion_epochs 100 \
+  --save_dir ./results/checkpoints \
+  --log_dir ./logs \
+  --batch_size 16 \
+  --device cuda:0</code></pre>
+    </section>
+
+    <section>
+      <h2>Future Work</h2>
+
+      <ul>
+        <li>Use affect-centered pretrained encoders for richer emotion-aware feature extraction.</li>
+        <li>Explore stronger optimization strategies such as multi-objective learning, EMA, and VAD-aware audio priors.</li>
+        <li>Study which facial action units, head-pose cues, and motion dynamics contribute to different emotion dimensions.</li>
+        <li>Explore more adaptive cross-modal fusion mechanisms beyond simple concatenation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Citation</h2>
+
+      <pre><code>@inproceedings{dissanayake2026mimicmetrics,
+  title={Two-Stage Multimodal Framework for Emotion Mimicry Intensity Prediction},
+  author={Dissanayake, Dinithi and Silva, Shaveen and Atukorala, Ovindu and Sasikumar, Prasanth and Nanayakkara, Suranga},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops},
+  year={2026}
+}</code></pre>
+    </section>
+
+    <div class="footer">
+      MimicMetrics · Augmented Human Lab · National University of Singapore
+    </div>
+
+  </div>
+</body>
+</html>
