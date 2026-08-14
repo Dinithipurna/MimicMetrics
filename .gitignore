@@ -88,6 +88,9 @@ experiments/
 *.pkl
 *.pickle
 
+# The demo reads its audio checkpoint and TorchScript extractor from models/.
+# Keep model binaries local unless they are deliberately force-added.
+
 # OS
 .DS_Store
 Thumbs.db

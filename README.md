@@ -1,5 +1,18 @@
 # MimicMetrics: Two-Stage Multimodal Framework for Emotion Mimicry Intensity Prediction
 
+## Aria Gen 2 live audio demo
+
+The `demo` branch includes a one-click audio-only inference path for Aria Gen 2.
+It captures the glasses microphone through the Project Aria SDK and visualizes
+the six live emotion-intensity predictions in Rerun.
+
+1. Put `audio_encoder_best.pt` and `audio_feature_extractor.pt` in `models/`.
+2. Connect and authenticate the Aria Gen 2 glasses over USB.
+3. Double-click `Run Aria Emotion Demo.command`.
+
+Close the process with `Ctrl+C`; streaming is stopped automatically. See
+`models/README.md` for the expected model formats.
+
 This repository contains the implementation of **MimicMetrics**, our submission to the **Hume-ABAW10 Emotional Mimicry Intensity (EMI) Challenge** at the CVPR ABAW Workshop.
 
 Our framework predicts continuous emotion mimicry intensity across six affective dimensions: **Admiration, Amusement, Determination, Empathic Pain, Excitement, and Joy**. The approach uses a staged multimodal training pipeline that combines **text, audio, vision, and optional motion features** through a lightweight fusion regressor.
