@@ -13,6 +13,13 @@ the six live emotion-intensity predictions in Rerun.
 Close the process with `Ctrl+C`; streaming is stopped automatically. See
 `models/README.md` for the expected model formats.
 
+### Original Aria live sensor view
+
+For the unmodified Project Aria Rerun viewer, connect the glasses over USB and
+double-click `Run Aria Live View.command`. It verifies the device, starts the
+stream before opening Rerun, and stops streaming automatically when the viewer
+closes.
+
 This repository contains the implementation of **MimicMetrics**, our submission to the **Hume-ABAW10 Emotional Mimicry Intensity (EMI) Challenge** at the CVPR ABAW Workshop.
 
 Our framework predicts continuous emotion mimicry intensity across six affective dimensions: **Admiration, Amusement, Determination, Empathic Pain, Excitement, and Joy**. The approach uses a staged multimodal training pipeline that combines **text, audio, vision, and optional motion features** through a lightweight fusion regressor.
